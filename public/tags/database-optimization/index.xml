@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Database Optimization on My New Hugo Site</title>
+    <link>http://localhost:1313/tags/database-optimization/</link>
+    <description>Recent content in Database Optimization on My New Hugo Site</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 03 Apr 2025 01:41:41 +0200</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/database-optimization/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Transaction for Update</title>
+      <link>http://localhost:1313/posts/post-2-transaction-for-update/</link>
+      <pubDate>Thu, 03 Apr 2025 01:41:41 +0200</pubDate>
+      <guid>http://localhost:1313/posts/post-2-transaction-for-update/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;&#xA;&lt;p&gt;When working with transactions in SQL, one of the challenges you might encounter is ensuring that operations on a shared resource are handled correctly without causing&#xA;multiple event emissions or race conditions. A common issue arises when multiple processes or users are updating the same record concurrently, leading to duplicated event&#xA;emissions or conflicting operations.&lt;/p&gt;&#xA;&lt;p&gt;In this post, I&amp;rsquo;ll walk through how I initially used the &lt;code&gt;FOR UPDATE&lt;/code&gt; clause in a transaction to avoid such problems and later transitioned to a simpler solution using &lt;code&gt;FOR  UPDATE RETURNING&lt;/code&gt;.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
