@@ -1,6 +1,6 @@
 +++
 date = '2025-04-03T01:41:41+02:00'
-draft = true
+draft = false
 title = 'Transaction for Update'
 tags = ["SQL", "Transaction", "FOR UPDATE", "Database Optimization"]
 +++
