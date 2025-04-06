@@ -7,10 +7,42 @@
     <title>Transaction for Update | My New Hugo Site</title>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
     <meta name="description" content="Introduction
-When working with transactions in SQL, one of the challenges you might encounter is ensuring that operations on a shared resource are handled correctly without causing
-multiple event emissions or race conditions. A common issue arises when multiple processes or users are updating the same record concurrently, leading to duplicated event
-emissions or conflicting operations.
-In this post, I&rsquo;ll walk through how I initially used the FOR UPDATE clause in a transaction to avoid such problems and later transitioned to a simpler solution using FOR  UPDATE RETURNING.">
+(This is for Mysql. Postgresql has different mechanism like RETURNING)
+func (s *Service) UnenrollMembership(
+	ctx  context.Context,
+	accountID  string,
+) error {
+	s.membershipRepo.UnenrollMembership(
+		ctx,
+		accountID,
+	)
+	if err != nil {
+		return err
+	}
+	
+	s.produceUnenrollmentEvent(ctx, accountID)
+}
+
+func (s *ChannelMembershipRepo) UnenrollChannelMembership(ctx context.Context, accountID string) error {
+	params  :=  db.UpdateMembershipEndTimeParams{
+		AccountID: accountID,
+		EndAt: sql.NullTime{
+			Time: time.Now(),
+			Valid: true,
+		},
+	}
+	err  :=  s.queries.UpdateMembershipEndTime(ctx, params)
+	if  err  !=  nil {
+		return  err
+	}
+	return nil
+}
+
+/* name: UpdateEnrollmentChannelMembershipEndTime :exec */ 
+-- UpdateEnrollmentChannelMembershipEndTime for any row of a given account_id with NULL end_time, updates the end_time 
+-- to the given time 
+UPDATE membership SET end_at = sqlc.arg(end_at) WHERE account_id = ? AND (end_at IS NULL OR end_at &gt; sqlc.arg(end_at));
+SQL code generated from sqlc query:">
     <meta name="generator" content="Hugo 0.145.0">
     
     
@@ -42,8 +74,8 @@ In this post, I&rsquo;ll walk through how I initially used the FOR UPDATE clause
     <meta property="og:url" content="http://localhost:1313/posts/post-2-transaction-for-update/">
   <meta property="og:site_name" content="My New Hugo Site">
   <meta property="og:title" content="Transaction for Update">
-  <meta property="og:description" content="Introduction When working with transactions in SQL, one of the challenges you might encounter is ensuring that operations on a shared resource are handled correctly without causing multiple event emissions or race conditions. A common issue arises when multiple processes or users are updating the same record concurrently, leading to duplicated event emissions or conflicting operations.
-In this post, I’ll walk through how I initially used the FOR UPDATE clause in a transaction to avoid such problems and later transitioned to a simpler solution using FOR UPDATE RETURNING.">
+  <meta property="og:description" content="Introduction (This is for Mysql. Postgresql has different mechanism like RETURNING)
+func (s *Service) UnenrollMembership( ctx context.Context, accountID string, ) error { s.membershipRepo.UnenrollMembership( ctx, accountID, ) if err != nil { return err } s.produceUnenrollmentEvent(ctx, accountID) } func (s *ChannelMembershipRepo) UnenrollChannelMembership(ctx context.Context, accountID string) error { params := db.UpdateMembershipEndTimeParams{ AccountID: accountID, EndAt: sql.NullTime{ Time: time.Now(), Valid: true, }, } err := s.queries.UpdateMembershipEndTime(ctx, params) if err != nil { return err } return nil } /* name: UpdateEnrollmentChannelMembershipEndTime :exec */ -- UpdateEnrollmentChannelMembershipEndTime for any row of a given account_id with NULL end_time, updates the end_time -- to the given time UPDATE membership SET end_at = sqlc.arg(end_at) WHERE account_id = ? AND (end_at IS NULL OR end_at &gt; sqlc.arg(end_at)); SQL code generated from sqlc query:">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -55,16 +87,16 @@ In this post, I’ll walk through how I initially used the FOR UPDATE clause in 
     <meta property="article:tag" content="Database Optimization">
 
   <meta itemprop="name" content="Transaction for Update">
-  <meta itemprop="description" content="Introduction When working with transactions in SQL, one of the challenges you might encounter is ensuring that operations on a shared resource are handled correctly without causing multiple event emissions or race conditions. A common issue arises when multiple processes or users are updating the same record concurrently, leading to duplicated event emissions or conflicting operations.
-In this post, I’ll walk through how I initially used the FOR UPDATE clause in a transaction to avoid such problems and later transitioned to a simpler solution using FOR UPDATE RETURNING.">
+  <meta itemprop="description" content="Introduction (This is for Mysql. Postgresql has different mechanism like RETURNING)
+func (s *Service) UnenrollMembership( ctx context.Context, accountID string, ) error { s.membershipRepo.UnenrollMembership( ctx, accountID, ) if err != nil { return err } s.produceUnenrollmentEvent(ctx, accountID) } func (s *ChannelMembershipRepo) UnenrollChannelMembership(ctx context.Context, accountID string) error { params := db.UpdateMembershipEndTimeParams{ AccountID: accountID, EndAt: sql.NullTime{ Time: time.Now(), Valid: true, }, } err := s.queries.UpdateMembershipEndTime(ctx, params) if err != nil { return err } return nil } /* name: UpdateEnrollmentChannelMembershipEndTime :exec */ -- UpdateEnrollmentChannelMembershipEndTime for any row of a given account_id with NULL end_time, updates the end_time -- to the given time UPDATE membership SET end_at = sqlc.arg(end_at) WHERE account_id = ? AND (end_at IS NULL OR end_at &gt; sqlc.arg(end_at)); SQL code generated from sqlc query:">
   <meta itemprop="datePublished" content="2025-04-03T01:41:41+02:00">
   <meta itemprop="dateModified" content="2025-04-03T01:41:41+02:00">
-  <meta itemprop="wordCount" content="536">
+  <meta itemprop="wordCount" content="477">
   <meta itemprop="keywords" content="SQL,Transaction,FOR UPDATE,Database Optimization">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Transaction for Update">
-  <meta name="twitter:description" content="Introduction When working with transactions in SQL, one of the challenges you might encounter is ensuring that operations on a shared resource are handled correctly without causing multiple event emissions or race conditions. A common issue arises when multiple processes or users are updating the same record concurrently, leading to duplicated event emissions or conflicting operations.
-In this post, I’ll walk through how I initially used the FOR UPDATE clause in a transaction to avoid such problems and later transitioned to a simpler solution using FOR UPDATE RETURNING.">
+  <meta name="twitter:description" content="Introduction (This is for Mysql. Postgresql has different mechanism like RETURNING)
+func (s *Service) UnenrollMembership( ctx context.Context, accountID string, ) error { s.membershipRepo.UnenrollMembership( ctx, accountID, ) if err != nil { return err } s.produceUnenrollmentEvent(ctx, accountID) } func (s *ChannelMembershipRepo) UnenrollChannelMembership(ctx context.Context, accountID string) error { params := db.UpdateMembershipEndTimeParams{ AccountID: accountID, EndAt: sql.NullTime{ Time: time.Now(), Valid: true, }, } err := s.queries.UpdateMembershipEndTime(ctx, params) if err != nil { return err } return nil } /* name: UpdateEnrollmentChannelMembershipEndTime :exec */ -- UpdateEnrollmentChannelMembershipEndTime for any row of a given account_id with NULL end_time, updates the end_time -- to the given time UPDATE membership SET end_at = sqlc.arg(end_at) WHERE account_id = ? AND (end_at IS NULL OR end_at &gt; sqlc.arg(end_at)); SQL code generated from sqlc query:">
 
 	
   </head><body class="ma0 avenir bg-near-white development">
@@ -118,59 +150,138 @@ In this post, I’ll walk through how I initially used the FOR UPDATE clause in 
       
     </header>
     <div class="nested-copy-line-height lh-copy serif f4 nested-links mid-gray pr4-l w-two-thirds-l"><h2 id="introduction">Introduction</h2>
-<p>When working with transactions in SQL, one of the challenges you might encounter is ensuring that operations on a shared resource are handled correctly without causing
-multiple event emissions or race conditions. A common issue arises when multiple processes or users are updating the same record concurrently, leading to duplicated event
-emissions or conflicting operations.</p>
-<p>In this post, I&rsquo;ll walk through how I initially used the <code>FOR UPDATE</code> clause in a transaction to avoid such problems and later transitioned to a simpler solution using <code>FOR  UPDATE RETURNING</code>.</p>
-<h2 id="initial-approach-using-for-update">Initial Approach: Using <code>FOR UPDATE</code></h2>
-<p>To prevent multiple processes from modifying the same data concurrently, I used <code>FOR UPDATE</code> in my SQL transaction. The <code>FOR UPDATE</code> clause locks the selected rows so that
-no other transactions can modify them until the current transaction is complete. This ensures that the update operation is atomic and that other processes wait for the
-current transaction to finish before proceeding.</p>
-<p>Here’s an example query I used initially:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span><span style="color:#66d9ef">BEGIN</span>;
+<p>(This is for Mysql. Postgresql has different mechanism like RETURNING)</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Service</span>) <span style="color:#a6e22e">UnenrollMembership</span>(
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">ctx</span>  <span style="color:#a6e22e">context</span>.<span style="color:#a6e22e">Context</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">accountID</span>  <span style="color:#66d9ef">string</span>,
+</span></span><span style="display:flex;"><span>) <span style="color:#66d9ef">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">membershipRepo</span>.<span style="color:#a6e22e">UnenrollMembership</span>(
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">ctx</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">accountID</span>,
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">produceUnenrollmentEvent</span>(<span style="color:#a6e22e">ctx</span>, <span style="color:#a6e22e">accountID</span>)
+</span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SELECT</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">FROM</span> my_table
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> some_condition <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">FOR</span> <span style="color:#66d9ef">UPDATE</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">ChannelMembershipRepo</span>) <span style="color:#a6e22e">UnenrollChannelMembership</span>(<span style="color:#a6e22e">ctx</span> <span style="color:#a6e22e">context</span>.<span style="color:#a6e22e">Context</span>, <span style="color:#a6e22e">accountID</span> <span style="color:#66d9ef">string</span>) <span style="color:#66d9ef">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">params</span>  <span style="color:#f92672">:=</span>  <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">UpdateMembershipEndTimeParams</span>{
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">AccountID</span>: <span style="color:#a6e22e">accountID</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">EndAt</span>: <span style="color:#a6e22e">sql</span>.<span style="color:#a6e22e">NullTime</span>{
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">Time</span>: <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Now</span>(),
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">Valid</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>		},
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">err</span>  <span style="color:#f92672">:=</span>  <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">queries</span>.<span style="color:#a6e22e">UpdateMembershipEndTime</span>(<span style="color:#a6e22e">ctx</span>, <span style="color:#a6e22e">params</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span>  <span style="color:#a6e22e">err</span>  <span style="color:#f92672">!=</span>  <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span>  <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#66d9ef">nil</span>
+</span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#75715e">-- Perform updates on the selected rows
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">UPDATE</span> my_table
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">SET</span> <span style="color:#66d9ef">column_name</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;new_value&#39;</span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">WHERE</span> some_condition <span style="color:#f92672">=</span> <span style="color:#66d9ef">true</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">/* name: UpdateEnrollmentChannelMembershipEndTime :exec */</span> 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">--</span> <span style="color:#a6e22e">UpdateEnrollmentChannelMembershipEndTime</span> <span style="color:#66d9ef">for</span> <span style="color:#66d9ef">any</span> <span style="color:#a6e22e">row</span> <span style="color:#a6e22e">of</span> <span style="color:#a6e22e">a</span> <span style="color:#a6e22e">given</span> <span style="color:#a6e22e">account_id</span> <span style="color:#a6e22e">with</span> <span style="color:#a6e22e">NULL</span> <span style="color:#a6e22e">end_time</span>, <span style="color:#a6e22e">updates</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">end_time</span> 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">--</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">given</span> <span style="color:#a6e22e">time</span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">UPDATE</span> <span style="color:#a6e22e">membership</span> <span style="color:#a6e22e">SET</span> <span style="color:#a6e22e">end_at</span> = <span style="color:#a6e22e">sqlc</span>.<span style="color:#a6e22e">arg</span>(<span style="color:#a6e22e">end_at</span>) <span style="color:#a6e22e">WHERE</span> <span style="color:#a6e22e">account_id</span> = <span style="color:#960050;background-color:#1e0010">?</span> <span style="color:#a6e22e">AND</span> (<span style="color:#a6e22e">end_at</span> <span style="color:#a6e22e">IS</span> <span style="color:#a6e22e">NULL</span> <span style="color:#a6e22e">OR</span> <span style="color:#a6e22e">end_at</span> &gt; <span style="color:#a6e22e">sqlc</span>.<span style="color:#a6e22e">arg</span>(<span style="color:#a6e22e">end_at</span>));
+</span></span></code></pre></div><p>SQL code generated from sqlc query:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>const updateEnrollmentChannelMembershipEndTime <span style="color:#f92672">=</span> <span style="color:#75715e">-- name: UpdateEnrollmentChannelMembershipEndTime :exec
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">UPDATE</span> membership <span style="color:#66d9ef">SET</span> end_at <span style="color:#f92672">=</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">WHERE</span> account_id <span style="color:#f92672">=</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">AND</span> (end_at <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">OR</span> end_at <span style="color:#f92672">&gt;</span> <span style="color:#f92672">?</span>)
+</span></span></code></pre></div><h2 id="initial-approach-using-row_count">Initial Approach: Using <code>ROW_COUNT()</code></h2>
+<p>:exec replaced  :execrows
+Does execrows use <code>sql SELECT ROW_COUNT();</code> internally?</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">/* name: UpdateEnrollmentChannelMembershipEndTime :execrows */</span> 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">--</span> <span style="color:#a6e22e">UpdateEnrollmentChannelMembershipEndTime</span> <span style="color:#66d9ef">for</span> <span style="color:#66d9ef">any</span> <span style="color:#a6e22e">row</span> <span style="color:#a6e22e">of</span> <span style="color:#a6e22e">a</span> <span style="color:#a6e22e">given</span> <span style="color:#a6e22e">account_id</span> <span style="color:#a6e22e">with</span> <span style="color:#a6e22e">NULL</span> <span style="color:#a6e22e">end_time</span>, <span style="color:#a6e22e">updates</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">end_time</span> 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">--</span> <span style="color:#a6e22e">to</span> <span style="color:#a6e22e">the</span> <span style="color:#a6e22e">given</span> <span style="color:#a6e22e">time</span> 
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">UPDATE</span> <span style="color:#a6e22e">membership</span> <span style="color:#a6e22e">SET</span> <span style="color:#a6e22e">end_at</span> = <span style="color:#a6e22e">sqlc</span>.<span style="color:#a6e22e">arg</span>(<span style="color:#a6e22e">end_at</span>) <span style="color:#a6e22e">WHERE</span> <span style="color:#a6e22e">account_id</span> = <span style="color:#960050;background-color:#1e0010">?</span> <span style="color:#a6e22e">AND</span> (<span style="color:#a6e22e">end_at</span> <span style="color:#a6e22e">IS</span> <span style="color:#a6e22e">NULL</span> <span style="color:#a6e22e">OR</span> <span style="color:#a6e22e">end_at</span> &gt; <span style="color:#a6e22e">sqlc</span>.<span style="color:#a6e22e">arg</span>(<span style="color:#a6e22e">end_at</span>));
+</span></span></code></pre></div><p>SQL code generated from sqlc query:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sql" data-lang="sql"><span style="display:flex;"><span>const updateEnrollmentChannelMembershipEndTime <span style="color:#f92672">=</span> <span style="color:#75715e">-- name: UpdateEnrollmentChannelMembershipEndTime :execrows
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">UPDATE</span> membership <span style="color:#66d9ef">SET</span> end_at <span style="color:#f92672">=</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">WHERE</span> account_id <span style="color:#f92672">=</span> <span style="color:#f92672">?</span> <span style="color:#66d9ef">AND</span> (end_at <span style="color:#66d9ef">IS</span> <span style="color:#66d9ef">NULL</span> <span style="color:#66d9ef">OR</span> end_at <span style="color:#f92672">&gt;</span> <span style="color:#f92672">?</span>)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">MembershipRepo</span>) <span style="color:#a6e22e">UnenrollMembership</span>(<span style="color:#a6e22e">ctx</span> <span style="color:#a6e22e">context</span>.<span style="color:#a6e22e">Context</span>, <span style="color:#a6e22e">accountID</span> <span style="color:#66d9ef">string</span>) (<span style="color:#66d9ef">bool</span>, <span style="color:#66d9ef">error</span>) {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">params</span>  <span style="color:#f92672">:=</span>  <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">UpdateMembershipEndTimeParams</span>{
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">AccountID</span>: <span style="color:#a6e22e">accountID</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">EndAt</span>: <span style="color:#a6e22e">sql</span>.<span style="color:#a6e22e">NullTime</span>{
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">Time</span>: <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Now</span>(),
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">Valid</span>: <span style="color:#66d9ef">true</span>,
+</span></span><span style="display:flex;"><span>		},
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">rowsAffected</span>, <span style="color:#a6e22e">err</span>  <span style="color:#f92672">:=</span>  <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">queries</span>.<span style="color:#a6e22e">UpdateMembershipEndTime</span>(<span style="color:#a6e22e">ctx</span>, <span style="color:#a6e22e">params</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span>  <span style="color:#a6e22e">err</span>  <span style="color:#f92672">!=</span>  <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span>  <span style="color:#66d9ef">false</span>, <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">rowsAffected</span> &gt; <span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">nil</span>
+</span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#66d9ef">COMMIT</span>;
-</span></span></code></pre></div><p>In this setup, the FOR UPDATE effectively prevented multiple processes from making conflicting updates to the same row. However, this solution still had its downsides, such
-as complex handling of multiple rows and a higher likelihood of contention in high-traffic environments.</p>
-<p>Refining the Approach: Using FOR UPDATE RETURNING
-After reflecting on the limitations of the initial approach, I decided to simplify the process. Instead of explicitly checking for event emissions and manually managing the
-lock, I switched to using FOR UPDATE RETURNING in my SQL query. The FOR UPDATE RETURNING clause not only locks the rows but also returns the count of the rows that were
-actually updated. This provides immediate feedback on the operation&rsquo;s result, which allows for easier decision-making and more efficient handling of the transaction.</p>
-<p>Here’s the updated query I used:</p>
-<pre tabindex="0"><code>sql
-Copy
-Edit
-BEGIN;
-
-WITH updated AS (
-  UPDATE my_table
-  SET column_name = &#39;new_value&#39;
-  WHERE some_condition = true
-  RETURNING *
-)
-SELECT COUNT(*) FROM updated;
-
-COMMIT;
-</code></pre><p>This method returns the count of updated rows directly, which simplifies the logic in the application and eliminates the need for manually handling multiple row updates or
-checking for locks.</p>
-<p>Conclusion: Which Method Is Better?
-After comparing both methods, I found that using FOR UPDATE RETURNING is a more efficient and simplified approach. Here&rsquo;s why:</p>
-<p>Simplicity: The FOR UPDATE RETURNING method reduces the complexity by combining the row lock and the update count in one query. There&rsquo;s no need for additional logic to track
-locks manually.</p>
-<p>Performance: With FOR UPDATE RETURNING, you get immediate feedback on how many rows were actually updated, allowing for better performance in high-concurrency environments.</p>
-<p>Readability: The simpler query is easier to understand and maintain in the long term, reducing the chance for errors.</p>
-<p>While FOR UPDATE works well for locking and updating rows, FOR UPDATE RETURNING offers a more concise and efficient solution, especially when you need to know the exact
-count of rows affected by the update. In the end, FOR UPDATE RETURNING is the better choice for simplifying event emission handling and ensuring that transactions are
-executed more efficiently.</p>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">Service</span>) <span style="color:#a6e22e">UnenrollMembership</span>(
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">ctx</span>  <span style="color:#a6e22e">context</span>.<span style="color:#a6e22e">Context</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">accountID</span>  <span style="color:#66d9ef">string</span>,
+</span></span><span style="display:flex;"><span>) <span style="color:#66d9ef">error</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">updated</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">membershipRepo</span>.<span style="color:#a6e22e">UnenrollMembership</span>(
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">ctx</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">accountID</span>,
+</span></span><span style="display:flex;"><span>	)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">err</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">updated</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">produceUnenrollmentEvent</span>(<span style="color:#a6e22e">ctx</span>, <span style="color:#a6e22e">accountID</span>)
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="the-test">The test</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> (<span style="color:#a6e22e">s</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">DBTestSuiteMapPDID</span>) <span style="color:#a6e22e">TestMultipleUpdateMembership</span>() {
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">accountID</span>  <span style="color:#f92672">:=</span>  <span style="color:#e6db74">&#34;account_id3&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">endAt</span>  <span style="color:#f92672">:=</span>  <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Now</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">params</span>  <span style="color:#f92672">:=</span>  <span style="color:#a6e22e">UpdateEnrollmentChannelMembershipEndTimeParams</span>{
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">AccountID</span>: <span style="color:#a6e22e">accountID</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">EndAt</span>: <span style="color:#a6e22e">commonsql</span>.<span style="color:#a6e22e">TimeToNullTime</span>(<span style="color:#a6e22e">endAt</span>),
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">numGoroutines</span>  <span style="color:#f92672">:=</span>  <span style="color:#ae81ff">100</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span>  <span style="color:#a6e22e">wg</span>  <span style="color:#a6e22e">sync</span>.<span style="color:#a6e22e">WaitGroup</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Add</span>(<span style="color:#a6e22e">numGoroutines</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">results</span> <span style="color:#f92672">:=</span> make(<span style="color:#66d9ef">chan</span> <span style="color:#66d9ef">bool</span>, <span style="color:#a6e22e">numGoroutines</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span>  <span style="color:#a6e22e">i</span>  <span style="color:#f92672">:=</span>  <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span>  &lt;  <span style="color:#a6e22e">numGoroutines</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">go</span>  <span style="color:#66d9ef">func</span>() {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">defer</span>  <span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Done</span>()
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">rowsAffected</span>, <span style="color:#a6e22e">err</span>  <span style="color:#f92672">:=</span>  <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">q</span>.<span style="color:#a6e22e">UpdateEnrollmentChannelMembershipEndTime</span>(
+</span></span><span style="display:flex;"><span>				<span style="color:#a6e22e">context</span>.<span style="color:#a6e22e">Background</span>(),
+</span></span><span style="display:flex;"><span>				<span style="color:#a6e22e">params</span>,
+</span></span><span style="display:flex;"><span>			)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">updated</span>  <span style="color:#f92672">:=</span>  <span style="color:#a6e22e">rowsAffected</span>  &gt;  <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">require</span>.<span style="color:#a6e22e">NoError</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">T</span>(), <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">results</span>  <span style="color:#f92672">&lt;-</span>  <span style="color:#a6e22e">updated</span>
+</span></span><span style="display:flex;"><span>		}()
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a6e22e">wg</span>.<span style="color:#a6e22e">Wait</span>()
+</span></span><span style="display:flex;"><span>	close(<span style="color:#a6e22e">results</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">var</span>  <span style="color:#a6e22e">updateCount</span>  <span style="color:#66d9ef">int</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span>  <span style="color:#a6e22e">updated</span>  <span style="color:#f92672">:=</span>  <span style="color:#66d9ef">range</span>  <span style="color:#a6e22e">results</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span>  <span style="color:#a6e22e">updated</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">updateCount</span><span style="color:#f92672">++</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">require</span>.<span style="color:#a6e22e">Equal</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">T</span>(), <span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">updateCount</span>, <span style="color:#e6db74">&#34;only one transaction should update the row&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">var</span>  <span style="color:#a6e22e">result</span>  <span style="color:#66d9ef">bool</span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">err</span>  <span style="color:#f92672">:=</span>  <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">DB</span>.<span style="color:#a6e22e">QueryRow</span>(
+</span></span><span style="display:flex;"><span><span style="color:#e6db74">&#34;SELECT COUNT(*) &gt; 0 FROM enrollment_channel_membership WHERE account_id = ? AND end_at = ?&#34;</span>,
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">accountID</span>, <span style="color:#a6e22e">endAt</span>,
+</span></span><span style="display:flex;"><span>).<span style="color:#a6e22e">Scan</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">result</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">require</span>.<span style="color:#a6e22e">NoError</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">T</span>(), <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">require</span>.<span style="color:#a6e22e">True</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">T</span>(), <span style="color:#a6e22e">result</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="problems-with-the-approach">Problems with the approach</h2>
+<h2 id="second-solution---using--for-update-inside-of-transaction">Second solution - using  <code>FOR UPDATE</code> inside of transaction</h2>
+<h2 id="deep-dive">Deep Dive</h2>
+<p>Why for update works and update doesnt event though UPDATE locks the rows? Whats different really? Does inside transaction FOR UPDATE checks if someone already ASKED for a lock?</p>
 <ul class="pa0">
   
    <li class="list di">

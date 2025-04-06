@@ -7,76 +7,160 @@ tags = ["SQL", "Transaction", "FOR UPDATE", "Database Optimization"]
 
 ## Introduction
 
-When working with transactions in SQL, one of the challenges you might encounter is ensuring that operations on a shared resource are handled correctly without causing 
-multiple event emissions or race conditions. A common issue arises when multiple processes or users are updating the same record concurrently, leading to duplicated event 
-emissions or conflicting operations.
+(This is for Mysql. Postgresql has different mechanism like RETURNING)
 
-In this post, I'll walk through how I initially used the `FOR UPDATE` clause in a transaction to avoid such problems and later transitioned to a simpler solution using `FOR 
-UPDATE RETURNING`.
+```go
+func (s *Service) UnenrollMembership(
+	ctx  context.Context,
+	accountID  string,
+) error {
+	s.membershipRepo.UnenrollMembership(
+		ctx,
+		accountID,
+	)
+	if err != nil {
+		return err
+	}
+	
+	s.produceUnenrollmentEvent(ctx, accountID)
+}
 
-## Initial Approach: Using `FOR UPDATE`
+func (s *ChannelMembershipRepo) UnenrollChannelMembership(ctx context.Context, accountID string) error {
+	params  :=  db.UpdateMembershipEndTimeParams{
+		AccountID: accountID,
+		EndAt: sql.NullTime{
+			Time: time.Now(),
+			Valid: true,
+		},
+	}
+	err  :=  s.queries.UpdateMembershipEndTime(ctx, params)
+	if  err  !=  nil {
+		return  err
+	}
+	return nil
+}
 
-To prevent multiple processes from modifying the same data concurrently, I used `FOR UPDATE` in my SQL transaction. The `FOR UPDATE` clause locks the selected rows so that 
-no other transactions can modify them until the current transaction is complete. This ensures that the update operation is atomic and that other processes wait for the 
-current transaction to finish before proceeding.
+/* name: UpdateEnrollmentChannelMembershipEndTime :exec */ 
+-- UpdateEnrollmentChannelMembershipEndTime for any row of a given account_id with NULL end_time, updates the end_time 
+-- to the given time 
+UPDATE membership SET end_at = sqlc.arg(end_at) WHERE account_id = ? AND (end_at IS NULL OR end_at > sqlc.arg(end_at));
 
-Here’s an example query I used initially:
-
+```
+SQL code generated from sqlc query:
 ```sql
-BEGIN;
+const updateEnrollmentChannelMembershipEndTime = -- name: UpdateEnrollmentChannelMembershipEndTime :exec
+UPDATE membership SET end_at = ? WHERE account_id = ? AND (end_at IS NULL OR end_at > ?)
+```
+ 
+## Initial Approach: Using `ROW_COUNT()`
 
-SELECT * FROM my_table
-WHERE some_condition = true
-FOR UPDATE;
-
--- Perform updates on the selected rows
-UPDATE my_table
-SET column_name = 'new_value'
-WHERE some_condition = true;
-
-COMMIT;
+:exec replaced  :execrows
+ Does execrows use ```sql SELECT ROW_COUNT();``` internally?
+```go
+/* name: UpdateEnrollmentChannelMembershipEndTime :execrows */ 
+-- UpdateEnrollmentChannelMembershipEndTime for any row of a given account_id with NULL end_time, updates the end_time 
+-- to the given time 
+UPDATE membership SET end_at = sqlc.arg(end_at) WHERE account_id = ? AND (end_at IS NULL OR end_at > sqlc.arg(end_at));
 ```
 
-In this setup, the FOR UPDATE effectively prevented multiple processes from making conflicting updates to the same row. However, this solution still had its downsides, such 
-as complex handling of multiple rows and a higher likelihood of contention in high-traffic environments.
-
-Refining the Approach: Using FOR UPDATE RETURNING
-After reflecting on the limitations of the initial approach, I decided to simplify the process. Instead of explicitly checking for event emissions and manually managing the 
-lock, I switched to using FOR UPDATE RETURNING in my SQL query. The FOR UPDATE RETURNING clause not only locks the rows but also returns the count of the rows that were 
-actually updated. This provides immediate feedback on the operation's result, which allows for easier decision-making and more efficient handling of the transaction.
-
-Here’s the updated query I used:
-
-```
-sql
-Copy
-Edit
-BEGIN;
-
-WITH updated AS (
-  UPDATE my_table
-  SET column_name = 'new_value'
-  WHERE some_condition = true
-  RETURNING *
-)
-SELECT COUNT(*) FROM updated;
-
-COMMIT;
+SQL code generated from sqlc query:
+```sql
+const updateEnrollmentChannelMembershipEndTime = -- name: UpdateEnrollmentChannelMembershipEndTime :execrows
+UPDATE membership SET end_at = ? WHERE account_id = ? AND (end_at IS NULL OR end_at > ?)
 ```
 
-This method returns the count of updated rows directly, which simplifies the logic in the application and eliminates the need for manually handling multiple row updates or 
-checking for locks.
+```go
+func (s *MembershipRepo) UnenrollMembership(ctx context.Context, accountID string) (bool, error) {
+	params  :=  db.UpdateMembershipEndTimeParams{
+		AccountID: accountID,
+		EndAt: sql.NullTime{
+			Time: time.Now(),
+			Valid: true,
+		},
+	}
+	rowsAffected, err  :=  s.queries.UpdateMembershipEndTime(ctx, params)
+	if  err  !=  nil {
+		return  false, err
+	}
+	return rowsAffected > 0, nil
+}
 
-Conclusion: Which Method Is Better?
-After comparing both methods, I found that using FOR UPDATE RETURNING is a more efficient and simplified approach. Here's why:
+func (s *Service) UnenrollMembership(
+	ctx  context.Context,
+	accountID  string,
+) error {
+	updated, err := s.membershipRepo.UnenrollMembership(
+		ctx,
+		accountID,
+	)
+	if err != nil {
+		return err
+	}
 
-Simplicity: The FOR UPDATE RETURNING method reduces the complexity by combining the row lock and the update count in one query. There's no need for additional logic to track 
-locks manually.
+	if updated {
+		s.produceUnenrollmentEvent(ctx, accountID)
+	}
+}
 
-Performance: With FOR UPDATE RETURNING, you get immediate feedback on how many rows were actually updated, allowing for better performance in high-concurrency environments.
+```
+ 
+  ## The test
 
-Readability: The simpler query is easier to understand and maintain in the long term, reducing the chance for errors.
+```go
+func (s *DBTestSuiteMapPDID) TestMultipleUpdateMembership() {
+	accountID  :=  "account_id3"
+	endAt  :=  time.Now()
 
-While FOR UPDATE works well for locking and updating rows, FOR UPDATE RETURNING offers a more concise and efficient solution, especially when you need to know the exact 
-count of rows affected by the update. In the end, FOR UPDATE RETURNING is the better choice for simplifying event emission handling and ensuring that transactions are 
-executed more efficiently.
+	params  :=  UpdateEnrollmentChannelMembershipEndTimeParams{
+		AccountID: accountID,
+		EndAt: commonsql.TimeToNullTime(endAt),
+	}
+
+	numGoroutines  :=  100
+	var  wg  sync.WaitGroup
+	wg.Add(numGoroutines)
+
+	results := make(chan bool, numGoroutines)
+	for  i  :=  0; i  <  numGoroutines; i++ {
+		go  func() {
+		defer  wg.Done()
+			rowsAffected, err  :=  s.q.UpdateEnrollmentChannelMembershipEndTime(
+				context.Background(),
+				params,
+			)
+
+			updated  :=  rowsAffected  >  0
+			require.NoError(s.T(), err)
+			results  <-  updated
+		}()
+}
+
+	wg.Wait()
+	close(results)
+
+	var  updateCount  int
+	for  updated  :=  range  results {
+	if  updated {
+		updateCount++
+	}
+}
+
+require.Equal(s.T(), 1, updateCount, "only one transaction should update the row")
+var  result  bool
+err  :=  s.DB.QueryRow(
+"SELECT COUNT(*) > 0 FROM enrollment_channel_membership WHERE account_id = ? AND end_at = ?",
+accountID, endAt,
+).Scan(&result)
+
+require.NoError(s.T(), err)
+require.True(s.T(), result)
+}
+```
+  
+ ## Problems with the approach
+
+ ## Second solution - using  `FOR UPDATE` inside of transaction
+
+## Deep Dive 
+
+Why for update works and update doesnt event though UPDATE locks the rows? Whats different really? Does inside transaction FOR UPDATE checks if someone already ASKED for a lock?
