@@ -64,11 +64,24 @@ Calling cancelFunc():
 ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 defer cancel()
 
-Copied
 If your operation finishes in 100ms, calling cancel():
 * Stops the 10-second timer.
 * Frees the memory and runtime resources associated with it.
 * Prevents a goroutine from sitting idle for 9.9 more seconds.
 
-✅ Summary
+
+## What cancelFunc() Actually Does
+When you call cancelFunc() (from context.WithCancel, WithTimeout, or WithDeadline):
+1. It closes the context’s Done() channel, signaling that the context is canceled.
+2. It propagates cancellation to all child contexts derived from it.
+3. It stops any internal timers (if applicable).
+4. It frees up internal resources (e.g., timers, goroutines).
+
+❌ What It Does Not Do
+* It does not delete or destroy the context object.
+* It does not remove the context from memory immediately (it will be garbage collected when no longer referenced).
+* It does not prevent you from reading values from the context (e.g., ctx.Value(...) still works).
+
+
+## Summary
 > Go allocates timers, channels, and sometimes goroutines to manage context cancellation.> Calling cancelFunc() ensures those resources are cleaned up immediately, avoiding leaks and unnecessary work.

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     
@@ -43,12 +43,12 @@ If ctx is tied to an HTTP request or RPC call, it will be canceled when the cl
     
     
     
-      <meta name="robots" content="index, follow">
+      <meta name="robots" content="noindex, nofollow">
     
     
 
     
-<link rel="stylesheet" href="/ananke/css/main.min.d05fb5f317fcf33b3a52936399bdf6f47dc776516e1692e412ec7d76f4a5faa2.css" >
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
 
 
 
@@ -64,10 +64,10 @@ If ctx is tied to an HTTP request or RPC call, it will be canceled when the cl
     
 
     
-      <link rel="canonical" href="https://example.org/posts/detached-context/">
+      <link rel="canonical" href="http://localhost:1313/posts/detached-context/">
     
 
-    <meta property="og:url" content="https://example.org/posts/detached-context/">
+    <meta property="og:url" content="http://localhost:1313/posts/detached-context/">
   <meta property="og:site_name" content="My New Hugo Site">
   <meta property="og:title" content="Detached Context">
   <meta property="og:description" content="func (s *service) DoSomethingWithContext( ctx context.Context, idA string, idB string, ) (*model.SomeStatus, error) { req := someapi.TriggerRequest{ FieldA: idA, FieldB: idB, } noCancelCTX := nocancel.FromContext(ctx) go func() { // Defer cancelFunc to ensure the context lives through the RPC newCtx, cancel := context.WithTimeout(noCancelCTX, 10*time.Minute) defer cancel() resp, err := s.client.TriggerAction( newCtx, connect.NewRequest(&amp;req), ) if err != nil { telemetry.L(ctx).Error(&#34;Async action failed&#34;, zap.Error(err)) } else { telemetry.L(ctx).Info(&#34;Async action succeeded&#34;, zap.Any(&#34;status&#34;, model.SomeStatus(resp.Msg.Status))) } }() return ptr.To(model.SomeStatusStarted), nil } 1. noCancelCTX := nocancel.FromContext(ctx) It takes an existing context.Context (ctx) and returns a new context that is not canceled when the original one is. This is useful when you want to detach a background task from the lifecycle of the incoming request. ✅ Why use it? If ctx is tied to an HTTP request or RPC call, it will be canceled when the client disconnects or the request times out.By using nocancel.FromContext(ctx), you’re saying:">
@@ -86,10 +86,8 @@ If ctx is tied to an HTTP request or RPC call, it will be canceled when the cl
   <meta name="twitter:title" content="Detached Context">
   <meta name="twitter:description" content="func (s *service) DoSomethingWithContext( ctx context.Context, idA string, idB string, ) (*model.SomeStatus, error) { req := someapi.TriggerRequest{ FieldA: idA, FieldB: idB, } noCancelCTX := nocancel.FromContext(ctx) go func() { // Defer cancelFunc to ensure the context lives through the RPC newCtx, cancel := context.WithTimeout(noCancelCTX, 10*time.Minute) defer cancel() resp, err := s.client.TriggerAction( newCtx, connect.NewRequest(&amp;req), ) if err != nil { telemetry.L(ctx).Error(&#34;Async action failed&#34;, zap.Error(err)) } else { telemetry.L(ctx).Info(&#34;Async action succeeded&#34;, zap.Any(&#34;status&#34;, model.SomeStatus(resp.Msg.Status))) } }() return ptr.To(model.SomeStatusStarted), nil } 1. noCancelCTX := nocancel.FromContext(ctx) It takes an existing context.Context (ctx) and returns a new context that is not canceled when the original one is. This is useful when you want to detach a background task from the lifecycle of the incoming request. ✅ Why use it? If ctx is tied to an HTTP request or RPC call, it will be canceled when the client disconnects or the request times out.By using nocancel.FromContext(ctx), you’re saying:">
 
-      
-    
 	
-  </head><body class="ma0 avenir bg-near-white production">
+  </head><body class="ma0 avenir bg-near-white development">
 
     
    
@@ -213,7 +211,7 @@ This pattern ensures:</p>
     </main>
     <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
   <div class="flex justify-between">
-  <a class="f4 fw4 hover-white white-70 dn dib-ns pv2 ph3 no-underline" href="https://example.org/" >
+  <a class="f4 fw4 hover-white white-70 dn dib-ns pv2 ph3 no-underline" href="http://localhost:1313/" >
     &copy;  My New Hugo Site 2025 
   </a>
     <div><div class="ananke-socials"></div>

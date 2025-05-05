@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     
@@ -47,12 +47,12 @@ SQL code generated from sqlc query:">
     
     
     
-      <meta name="robots" content="index, follow">
+      <meta name="robots" content="noindex, nofollow">
     
     
 
     
-<link rel="stylesheet" href="/ananke/css/main.min.d05fb5f317fcf33b3a52936399bdf6f47dc776516e1692e412ec7d76f4a5faa2.css" >
+<link rel="stylesheet" href="/ananke/css/main.min.css" >
 
 
 
@@ -68,10 +68,10 @@ SQL code generated from sqlc query:">
     
 
     
-      <link rel="canonical" href="https://example.org/posts/post-2-transaction-for-update/">
+      <link rel="canonical" href="http://localhost:1313/posts/post-2-transaction-for-update/">
     
 
-    <meta property="og:url" content="https://example.org/posts/post-2-transaction-for-update/">
+    <meta property="og:url" content="http://localhost:1313/posts/post-2-transaction-for-update/">
   <meta property="og:site_name" content="My New Hugo Site">
   <meta property="og:title" content="Transaction for Update">
   <meta property="og:description" content="Introduction (This is for Mysql. Postgresql has different mechanism like RETURNING)
@@ -98,10 +98,8 @@ func (s *Service) UnenrollMembership( ctx context.Context, accountID string, ) e
   <meta name="twitter:description" content="Introduction (This is for Mysql. Postgresql has different mechanism like RETURNING)
 func (s *Service) UnenrollMembership( ctx context.Context, accountID string, ) error { s.membershipRepo.UnenrollMembership( ctx, accountID, ) if err != nil { return err } s.produceUnenrollmentEvent(ctx, accountID) } func (s *ChannelMembershipRepo) UnenrollChannelMembership(ctx context.Context, accountID string) error { params := db.UpdateMembershipEndTimeParams{ AccountID: accountID, EndAt: sql.NullTime{ Time: time.Now(), Valid: true, }, } err := s.queries.UpdateMembershipEndTime(ctx, params) if err != nil { return err } return nil } /* name: UpdateEnrollmentChannelMembershipEndTime :exec */ -- UpdateEnrollmentChannelMembershipEndTime for any row of a given account_id with NULL end_time, updates the end_time -- to the given time UPDATE membership SET end_at = sqlc.arg(end_at) WHERE account_id = ? AND (end_at IS NULL OR end_at &gt; sqlc.arg(end_at)); SQL code generated from sqlc query:">
 
-      
-    
 	
-  </head><body class="ma0 avenir bg-near-white production">
+  </head><body class="ma0 avenir bg-near-white development">
 
     
    
@@ -321,7 +319,7 @@ Does execrows use <code>sql SELECT ROW_COUNT();</code> internally?</p>
     </main>
     <footer class="bg-black bottom-0 w-100 pa3" role="contentinfo">
   <div class="flex justify-between">
-  <a class="f4 fw4 hover-white white-70 dn dib-ns pv2 ph3 no-underline" href="https://example.org/" >
+  <a class="f4 fw4 hover-white white-70 dn dib-ns pv2 ph3 no-underline" href="http://localhost:1313/" >
     &copy;  My New Hugo Site 2025 
   </a>
     <div><div class="ananke-socials"></div>
